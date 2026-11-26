@@ -16,6 +16,25 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <html>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#121417" />
+        <meta name="application-name" content="Posteeze" />
+        <meta name="apple-mobile-web-app-title" content="Posteeze" />
+        <meta name="description" content="Plan, write and schedule posts for every channel from one calendar. Posteeze publishes them on time." />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Posteeze" />
+        <meta property="og:title" content="Posteeze: your socials, on autopilot" />
+        <meta property="og:description" content="Plan, write and schedule posts for every channel from one calendar." />
+        <meta property="og:image" content={`${process.env.FRONTEND_URL || ''}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Posteeze: your socials, on autopilot" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Posteeze: your socials, on autopilot" />
+        <meta name="twitter:description" content="Plan, write and schedule posts for every channel from one calendar." />
+        <meta name="twitter:image" content={`${process.env.FRONTEND_URL || ''}/og-image.png`} />
       </head>
       <body
         className={clsx(jakartaSans.className, 'dark text-primary !bg-primary')}

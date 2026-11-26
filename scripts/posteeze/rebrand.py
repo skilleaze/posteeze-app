@@ -7,7 +7,7 @@ Idempotent. Replaces user-visible Postiz names, links, logos, favicons and
 purple brand colours with the Posteeze (Orbit) brand. Identifiers, package
 names, env var names and HTTP headers are left alone so the code keeps working.
 """
-import os, re, shutil, pathlib
+import os, re, shutil, pathlib, json
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ASSETS = pathlib.Path(__file__).resolve().parent / "assets"
@@ -272,8 +272,51 @@ def social_login_only_when_configured():
     print("social sign-in shown only when configured")
 
 
+HEAD_TAGS = """<link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#121417" />
+        <meta name="application-name" content="Posteeze" />
+        <meta name="apple-mobile-web-app-title" content="Posteeze" />
+        <meta name="description" content="Plan, write and schedule posts for every channel from one calendar. Posteeze publishes them on time." />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Posteeze" />
+        <meta property="og:title" content="Posteeze: your socials, on autopilot" />
+        <meta property="og:description" content="Plan, write and schedule posts for every channel from one calendar." />
+        <meta property="og:image" content={`${process.env.FRONTEND_URL || ''}/og-image.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Posteeze: your socials, on autopilot" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Posteeze: your socials, on autopilot" />
+        <meta name="twitter:description" content="Plan, write and schedule posts for every channel from one calendar." />
+        <meta name="twitter:image" content={`${process.env.FRONTEND_URL || ''}/og-image.png`} />"""
+
+
+def share_and_icons():
+    pub = pathlib.Path("apps/frontend/public")
+    shutil.copy(ASSETS / "og-image.png", pub / "og-image.png")
+    shutil.copy(ASSETS / "icon-192.png", pub / "icon-192.png")
+    shutil.copy(ASSETS / "icon.svg", pub / "icon.svg")
+    (pub / "site.webmanifest").write_text(json.dumps({
+        "name": BRAND, "short_name": BRAND, "start_url": "/", "display": "standalone",
+        "background_color": NIGHT, "theme_color": NIGHT,
+        "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+                  {"src": "/favicon.png", "sizes": "512x512", "type": "image/png"},
+                  {"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}]}, indent=2))
+    for lay in ["(app)", "(extension)", "(provider)"]:
+        p = pathlib.Path(f"apps/frontend/src/app/{lay}/layout.tsx")
+        s = p.read_text()
+        if "og:image" not in s:
+            s = s.replace('<link rel="icon" href="/favicon.ico" sizes="any" />', HEAD_TAGS, 1)
+            p.write_text(s)
+    print("favicons, manifest and share tags set")
+
+
 if __name__ == "__main__":
     social_login_only_when_configured()
+    share_and_icons()
     rewrite_text()
     scss_tokens()
     assets()
