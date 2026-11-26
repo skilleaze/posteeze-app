@@ -48,6 +48,7 @@ import {
 } from '@gitroom/backend/api/routes/oauth.controller';
 import { AnnouncementsController } from '@gitroom/backend/api/routes/announcements.controller';
 import { AdminController } from '@gitroom/backend/api/routes/admin.controller';
+import { PosteezeController } from '@gitroom/backend/api/routes/posteeze.controller';
 import { AuthProviderManager } from '@gitroom/backend/services/auth/providers/providers.manager';
 import { GithubProvider } from '@gitroom/backend/services/auth/providers/github.provider';
 import { GoogleProvider } from '@gitroom/backend/services/auth/providers/google.provider';
@@ -97,6 +98,7 @@ const authenticatedController = [
         MonitorController,
         EnterpriseController,
         NoAuthIntegrationsController,
+        PosteezeController,
         OAuthController,
         MediaWidgetController,
         ClippingWidgetController,
