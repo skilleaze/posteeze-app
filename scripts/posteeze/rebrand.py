@@ -59,7 +59,7 @@ CLASS_RE = re.compile(r"(className=)([\"'`])(.*?)\2", re.S)
 def fix_classes(src):
     def repl(m):
         cls = m.group(3)
-        if ("bg-btnPrimary" in cls or f"bg-[{LIME}]" in cls) and "text-white" in cls:
+        if ("bg-btnPrimary" in cls or "bg-forth" in cls or f"bg-[{LIME}]" in cls) and "text-white" in cls:
             cls = cls.replace("text-white", f"text-[{NIGHT}]")
         return f"{m.group(1)}{m.group(2)}{cls}{m.group(2)}"
     return CLASS_RE.sub(repl, src)
@@ -87,6 +87,7 @@ def rewrite_text():
                 s = COLOR_RE.sub(lambda m: COLOR_MAP[m.group(1).lower()], s)
                 if f.endswith(".tsx"):
                     s = fix_classes(s)
+                    s = s.replace("bg-forth text-white", f"bg-forth text-[{NIGHT}]")
                 if s != o:
                     p.write_text(s)
                     changed += 1
