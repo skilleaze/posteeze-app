@@ -98,8 +98,10 @@ export function RegisterAfter({
     genericOauth,
     neynarClientId,
     appleClientId,
+    googleLogin,
     billingEnabled,
   } = useVariables();
+  const anySocialLogin = !!(googleLogin || appleClientId || neynarClientId || billingEnabled || genericOauth || !isGeneral);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const fireEvents = useFireEvents();
@@ -165,9 +167,9 @@ export function RegisterAfter({
               {t('sign_up', 'Sign Up')}
             </h1>
           </div>
-          <div className="text-[14px] mt-[32px] mb-[12px]">
+          {anySocialLogin && (<div className="text-[14px] mt-[32px] mb-[12px]">
             {t('continue_with', 'Continue With')}
-          </div>
+          </div>)}
           <div className="flex flex-col text-[14px]">
             {!isAfterProvider &&
               (!isGeneral ? (
@@ -176,16 +178,14 @@ export function RegisterAfter({
                 <div className="gap-[8px] flex">
                   {genericOauth && isGeneral ? (
                     <OauthProvider />
-                  ) : (
-                    <GoogleProvider />
-                  )}
+                  ) : googleLogin ? (<GoogleProvider />) : null}
                   {!!appleClientId && <AppleProvider />}
                   {!!neynarClientId && <FarcasterProvider />}
                   {billingEnabled && <WalletProvider />}
                 </div>
               ))}
             {!isAfterProvider && (
-              <div className="h-[20px] mb-[24px] mt-[24px] relative">
+              <div className={anySocialLogin ? "h-[20px] mb-[24px] mt-[24px] relative" : "hidden"}>
                 <div className="absolute w-full h-[1px] bg-fifth top-[50%] -translate-y-[50%]" />
                 <div
                   className={`absolute z-[1] justify-center items-center w-full start-0 -top-[4px] flex`}

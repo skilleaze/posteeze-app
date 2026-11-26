@@ -233,7 +233,47 @@ def extra_ui():
     print("ecosystem UI hidden")
 
 
+def social_login_only_when_configured():
+    """Show 'Continue with Google' only when YOUTUBE_CLIENT_ID is set (Postiz's
+    Google sign-in uses it), and hide the 'Continue with / or' block when no
+    social sign-in is configured at all."""
+    ctx = pathlib.Path("libraries/react-shared-libraries/src/helpers/variable.context.tsx")
+    s = ctx.read_text()
+    if "googleLogin" not in s:
+        s = s.replace("  appleClientId: string;\n", "  appleClientId: string;\n  googleLogin?: boolean;\n", 1)
+        s = s.replace("  appleClientId: '',\n", "  appleClientId: '',\n  googleLogin: false,\n", 1)
+        ctx.write_text(s)
+    for lay in ["(app)", "(extension)", "(provider)"]:
+        p = pathlib.Path(f"apps/frontend/src/app/{lay}/layout.tsx")
+        s = p.read_text()
+        if "googleLogin=" not in s:
+            s = s.replace("appleClientId={process.env.APPLE_CLIENT_ID!}",
+                          "appleClientId={process.env.APPLE_CLIENT_ID!}\n          googleLogin={!!process.env.YOUTUBE_CLIENT_ID}", 1)
+            p.write_text(s)
+    for f in ["login.tsx", "register.tsx"]:
+        p = pathlib.Path(f"apps/frontend/src/components/auth/{f}")
+        s = p.read_text()
+        if "googleLogin" in s:
+            continue
+        s = s.replace("    appleClientId,\n", "    appleClientId,\n    googleLogin,\n", 1)
+        s = re.sub(r"\(\s*<GoogleProvider />\s*\)", "googleLogin ? (<GoogleProvider />) : null", s)
+        s = re.sub(r"(?<!\()<GoogleProvider />(?!\))", "{googleLogin ? <GoogleProvider /> : null}", s)
+        # hide the whole 'Continue with ... or' block when nothing is configured
+        s = s.replace("} = useVariables();",
+                      "} = useVariables();\n  const anySocialLogin = !!(googleLogin || appleClientId || neynarClientId || billingEnabled || genericOauth || !isGeneral);", 1)
+        s = s.replace("""          <div className="text-[14px] mt-[32px] mb-[12px]">
+            {t('continue_with', 'Continue With')}
+          </div>""", """          {anySocialLogin && (<div className="text-[14px] mt-[32px] mb-[12px]">
+            {t('continue_with', 'Continue With')}
+          </div>)}""")
+        s = s.replace('<div className="h-[20px] mb-[24px] mt-[24px] relative">',
+                      '<div className={anySocialLogin ? "h-[20px] mb-[24px] mt-[24px] relative" : "hidden"}>')
+        p.write_text(s)
+    print("social sign-in shown only when configured")
+
+
 if __name__ == "__main__":
+    social_login_only_when_configured()
     rewrite_text()
     scss_tokens()
     assets()
