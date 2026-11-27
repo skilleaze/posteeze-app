@@ -63,15 +63,19 @@ export class LinkedinProvider extends SocialAbstract implements SocialProvider {
   oneTimeToken = true;
 
   isBetweenSteps = false;
-  scopes = [
-    'openid',
-    'profile',
-    'w_member_social',
-    'r_basicprofile',
-    'rw_organization_admin',
-    'w_organization_social',
-    'r_organization_social',
-  ];
+  // LINKEDIN_SCOPES narrows the request to what the LinkedIn app has been
+  // granted (e.g. "openid profile w_member_social" before Community Management)
+  scopes = process.env.LINKEDIN_SCOPES
+    ? process.env.LINKEDIN_SCOPES.split(/[\s,]+/).filter(Boolean)
+    : [
+        'openid',
+        'profile',
+        'w_member_social',
+        'r_basicprofile',
+        'rw_organization_admin',
+        'w_organization_social',
+        'r_organization_social',
+      ];
   override maxConcurrentJob = 8; // LinkedIn limits are daily budgets
   refreshWait = true;
   refreshRepeat = true;
